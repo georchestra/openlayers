@@ -14,7 +14,7 @@
     
     function test_read(t) {
         
-        t.plan(23);
+        t.plan(24);
 
         var xml = document.getElementById("gssample").firstChild.nodeValue;
         var doc = new OpenLayers.Format.XML().read(xml);
@@ -80,6 +80,7 @@
         t.eq(capability.layers.length, 22, "correct number of layers parsed");
         
         var layer = capability.layers[2];
+        t.eq(layer.infoFormats, ["text/plain", "text/html", "application/vnd.ogc.gml"], "infoFormats set on layer");
         t.eq(layer.name, "tiger:tiger_roads", "[2] correct layer name");
         t.eq(layer.prefix, "tiger", "[2] correct layer prefix");
         t.eq(layer.title, "Manhattan (NY) roads", "[2] correct layer title");
@@ -339,7 +340,7 @@
         
         // needed for the minScale/maxScale test, see below
         var dpi = OpenLayers.DOTS_PER_INCH;
-        OpenLayers.DOTS_PER_INCH = 90.71;
+        OpenLayers.DOTS_PER_INCH = 90.710230403857;
 
         var xml = document.getElementById("ogcsample").firstChild.nodeValue;
         var doc = new OpenLayers.Format.XML().read(xml);
@@ -376,7 +377,7 @@
 
         <ScaleHint min="0.395998292216226" max="98.9995730540565" />
 
-        corresponds to (RESOLUTION keyword in MAP file has value of 90.71):
+        corresponds to (RESOLUTION keyword in MAP file has value of 90.710230403857):
 
         MAXSCALE 250000
         MINSCALE 1000

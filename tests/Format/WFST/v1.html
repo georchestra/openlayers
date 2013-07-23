@@ -45,7 +45,7 @@
         deleteFeature.state = OpenLayers.State.DELETE;
         deleteFeature.fid = "fid.37";
 
-        t.plan(8);
+        t.plan(9);
         var snippets = {
             "GetFeature": {handle: "handle_g", maxFeatures: 1, outputFormat: 'json'},
             "Transaction": {handle: "handle_t"},
@@ -82,6 +82,13 @@
         var expected = readXML("UpdateModified");
         var got = format.writers["wfs"]["Update"].apply(format, [{feature: updateFeature}]);
         t.xml_eq(got, expected, "Update request for feature with modified geometry created correctly even if original geometry was null");
+
+        updateFeature.modified.attributes = {foo: undefined};
+        updateFeature.attributes.foo = "baz";
+        delete updateFeature.modified.geometry;
+        var expected = readXML("UpdateModifiedNoGeometry");
+        var got = format.writers["wfs"]["Update"].apply(format, [{feature: updateFeature}]);
+        t.xml_eq(got, expected, "Update request for feature with no modified geometry but modified attributes with undefined created correctly");
     }
 
     function test_writeNative(t) {
@@ -132,6 +139,28 @@
             var got = format.writers["wfs"]["Update"].apply(format, [arg]);
             t.xml_eq(got, expected, snippet + " request without geometry created correctly");
         }
+    }
+    
+    function test_setFilterProperty(t) {
+        t.plan(2);
+        var format = new OpenLayers.Format.WFST({
+            geometryName: "foo"
+        });
+        var filter = new OpenLayers.Filter.Logical({
+            type: OpenLayers.Filter.Logical.AND,
+            filters: [new OpenLayers.Filter.Spatial({
+                type: OpenLayers.Filter.Spatial.BBOX,
+                value: new OpenLayers.Bounds(1,2,3,4)
+            }), new OpenLayers.Filter.Spatial({
+                type: OpenLayers.Filter.Spatial.DWITHIN,
+                property: "bar",
+                value: new OpenLayers.Geometry.Point(1,2),
+                distance: 10
+            })]
+        });
+        format.setFilterProperty(filter);
+        t.eq(filter.filters[0].property, "foo", "property set if not set on filter");
+        t.eq(filter.filters[1].property, "bar", "property not set if set on filter");
     }
 
     function test_update_null_geometry(t) {

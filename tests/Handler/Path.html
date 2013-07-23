@@ -534,6 +534,43 @@
         map.destroy();
     }
 
+    function test_freehand_maxVertices(t) {
+        t.plan(1);
+        var map = new OpenLayers.Map("map", {
+            resolutions: [1]
+        });
+        var layer = new OpenLayers.Layer.Vector("foo", {
+            maxExtent: new OpenLayers.Bounds(-10, -10, 10, 10),
+            isBaseLayer: true
+        });
+        map.addLayer(layer);
+        var control = new OpenLayers.Control({});
+        var log = {};
+        var MAX_VERTICES = 2;
+        var doneCallback = function(geo) {
+            t.eq(geo.components.length, MAX_VERTICES,
+                'When maxVertices is reached, the geometry is finalized automatically');
+        };
+        var handler = new OpenLayers.Handler.Path(control, 
+            {'done': doneCallback}, 
+            {freehand: true, 
+             maxVertices: MAX_VERTICES});
+        control.handler = handler;
+        map.addControl(control);
+        map.setCenter(new OpenLayers.LonLat(0, 0), 0);
+
+        // mock up feature freehand drawing
+        handler.activate();
+        var evt = {xy: new OpenLayers.Pixel(0, 0)};
+        handler.mousemove(evt);
+        handler.mousedown(evt);
+        evt = {xy: new OpenLayers.Pixel(20, 20)};
+        handler.mousemove(evt);
+        evt = {xy: new OpenLayers.Pixel(40, 40)};
+        handler.mousemove(evt);
+        map.destroy();
+    }
+    
     /**
      * Helper functions for editing method tests
      */ 
@@ -563,6 +600,12 @@
         handler.mousemove({type: "mousemove", xy: px});
         handler.mousedown({type: "mousedown", xy: px});
         handler.mouseup({type: "mouseup", xy: px});
+    }
+    function userTap(handler, x, y) {
+        var px = new OpenLayers.Pixel(x, y);
+        handler.touchstart({xy: px});
+        handler.touchmove({xy: px});
+        handler.touchend({});
     }
 
     /**
@@ -683,7 +726,7 @@
     }
 
     function test_undoredo1(t) {
-        t.plan(4);
+        t.plan(5);
         var obj = editingMethodsSetup();
         var map = obj.map;
         var handler = obj.handler;
@@ -709,6 +752,17 @@
         // one redo
         handler.redo();
         t.geom_eq(original, handler.line.geometry, "one redo undoes one undo");
+        
+        // add point via touch
+        userTap(handler, 10, 50);
+        handler.undo();
+        currentLen = handler.line.geometry.components.length;
+        t.geom_eq(
+            handler.line.geometry.components[currentLen-1],
+            handler.line.geometry.components[currentLen-2],
+            "current point (mouse position) is set to the last digitized " + 
+            "point after undo on touch devices"
+        );
         
         // cleanup
         map.destroy();
