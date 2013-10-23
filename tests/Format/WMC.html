@@ -34,6 +34,8 @@
              "(v1.0.0) layer numZoomLevels correctly set");
         t.eq(layer.isBaseLayer, true,
              "(v1.0.0) layer isBaseLayer correctly set for base layer");
+        t.eq(layer.transitionEffect, "resize",
+             "(v1.0.0) layer transitionEffect correctly set for base layer");
         t.eq(layer.tileSize.w, 512, 
              "(v1.0.0) layer tileSize width correctly set");
         t.eq(layer.tileSize.h, 1024, 
@@ -54,6 +56,9 @@
              "(v1.0.0) layer singleTile correctly set");
         t.eq(layer.opacity, 0.8, 
              "(v1.0.0) layer opacity correctly set");
+        // check out transitionEffect
+        t.eq(layer.transitionEffect, null,
+             "(v1.0.0) layer transitionEffect correctly set");
         map.destroy();
         
         // test v1.1.0
@@ -74,7 +79,9 @@
         t.eq(layer.numZoomLevels, 4,
              "(v1.1.0) layer numZoomLevels correctly set");
         t.eq(layer.isBaseLayer, true,
-             "(v1.1.0) layer isBaseLayer correctly set for overlay");
+             "(v1.1.0) layer isBaseLayer correctly set for base layer");
+        t.eq(layer.transitionEffect, "resize",
+             "(v1.1.0) layer transitionEffect correctly set for base layer");
         // check out layer not in switcher
         layer = map.layers[2];
         t.eq(layer.displayInLayerSwitcher, false, 
@@ -95,6 +102,9 @@
              "(v1.1.0) layer singleTile correctly set");
         t.eq(layer.opacity, 0.8, 
              "(v1.1.0) layer opacity correctly set");
+        // check out transitionEffect
+        t.eq(layer.transitionEffect, null,
+             "(v1.1.0) layer transitionEffect correctly set");
         map.destroy();
 
         // Check if maxResolution is set correctly
